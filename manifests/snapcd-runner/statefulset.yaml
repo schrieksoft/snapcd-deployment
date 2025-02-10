@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: snapcd-runner
+  labels:
+    app: snapcd-runner
+spec:
+  serviceName: snapcd-runner-headless  # Define a headless service for the StatefulSet to ensure stable network IDs
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snapcd-runner
+  template:
+    metadata:
+      labels:
+        app: snapcd-runner
+    spec:
+      containers:
+      - name: snapcd-runner
+        image: TODO
+        ports:
+        - containerPort: 8080  # Define any required ports here
+        volumeMounts:
+        - name: snapcd-runner-storage
+          mountPath: /data  # Define the data storage path as needed
+  volumeClaimTemplates:
+  - metadata:
+      name: snapcd-runner-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi  # Set storage size as needed

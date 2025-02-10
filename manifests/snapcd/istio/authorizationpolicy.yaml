@@ -1,0 +1,9 @@
+# Allow all traffic
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: snapcd
+spec:
+  action: ALLOW
+  rules:
+    - {}

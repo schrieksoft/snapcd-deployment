@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: snapcd-operator
+  name: snapcd-operator
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: snapcd-operator
+  sessionAffinity: None
+  type: ClusterIP

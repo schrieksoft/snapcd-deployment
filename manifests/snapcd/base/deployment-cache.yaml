@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: snapcd-cache
+  name: snapcd-cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snapcd-cache
+  template:
+    metadata:
+      labels:
+        app: snapcd-cache
+    spec:
+      containers:
+      - image: TODO
+        name: snapcd-cache

@@ -1,0 +1,9 @@
+namespace: snapcd
+resources:
+  - ../base
+  - authorizationpolicy.yaml
+  - virtualservice.yaml
+
+
+patchesStrategicMerge:
+  - patches/namespace.yaml

@@ -1,0 +1,3 @@
+namespace: "{{.Env.ARGOCD_ENV_NAMESPACE}}"
+resources:
+  - statefulset.yaml
