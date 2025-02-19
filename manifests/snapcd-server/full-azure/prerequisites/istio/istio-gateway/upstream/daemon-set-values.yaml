@@ -1,0 +1,28 @@
+kind: DaemonSet
+service:
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  externalTrafficPolicy: Local
+tolerations:
+  # - key: node-role.kubernetes.io/control-plane
+  #   operator: Exists
+  #   effect: NoSchedule
+  # - key: node-role.kubernetes.io/master
+  #   operator: Exists
+  #   effect: NoSchedule
+  # kubernetes.azure.com/scalesetpriority=spot:NoSchedule
+  - key: kubernetes.azure.com/scalesetpriority
+    operator: Equal
+    value: spot
+    effect: NoSchedule

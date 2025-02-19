@@ -1,0 +1,4 @@
+resources:
+  - generated-public.yaml
+  - generated-private.yaml
+  # - generated-daemon-set.yaml

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      containers:
+        - name: influxdb
+          image: influxdb:2.7
+          env:
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: "setup"
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: "snapcd-org"
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: "snapcd-bucket"
+            - name: DOCKER_INFLUXDB_INIT_RETENTION
+              value: "21d"
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb
+                  key: DOCKER_INFLUXDB_INIT_USERNAME
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb
+                  key: DOCKER_INFLUXDB_INIT_PASSWORD
+            - name: DOCKER_INFLUXDB_INIT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb
+                  key: DOCKER_INFLUXDB_INIT_TOKEN
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/influxdb2
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: influxdb

@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: "{{.Env.ARGOCD_ENV_NAME}}"
+  namespace: "{{.Env.ARGOCD_ENV_NAMESPACE}}"
+spec:
+  selector:
+    istio: "{{.Env.ARGOCD_ENV_GATEWAY_LABEL}}"
+  servers:
+    - hosts:
+        - "{{.Env.ARGOCD_ENV_FQDN}}"
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
+      tls:
+        httpsRedirect: true #redirect http to https
+    - hosts:
+        - "{{.Env.ARGOCD_ENV_FQDN}}"
+      port:
+        name: https
+        number: 443
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: "{{.Env.ARGOCD_ENV_NAMESPACE}}--{{.Env.ARGOCD_ENV_NAME}}"

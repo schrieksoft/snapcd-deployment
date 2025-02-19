@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: "{{.Env.ARGOCD_ENV_NAMESPACE}}--{{.Env.ARGOCD_ENV_NAME}}"
+spec:
+  acme:
+    email: karl.schriek@bma.network
+    server: "{{.Env.ARGOCD_ENV_ACME_URL}}"
+    privateKeySecretRef:
+      name: "{{.Env.ARGOCD_ENV_NAMESPACE}}-{{.Env.ARGOCD_ENV_NAME}}-account-key"
+    solvers:
+      - dns01:
+          azureDNS:
+            subscriptionID: "{{.Env.ARGOCD_ENV_DNS_ZONE_SUBSCRIPTION_ID}}"
+            resourceGroupName: "{{.Env.ARGOCD_ENV_DNS_ZONE_RESOURCE_GROUP_NAME}}"
+            hostedZoneName: "{{.Env.ARGOCD_ENV_DNS_ZONE_NAME}}"
+            environment: AzurePublicCloud

@@ -1,0 +1,5 @@
+resources:
+  - gateway.yaml
+  - cluster-issuer.yaml
+  - certificate.yaml
+  - virtualservice.yaml

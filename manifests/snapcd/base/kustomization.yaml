@@ -1,8 +1,0 @@
-namespace: snapcd
-
-resources:
-  - namespace.yaml
-  - deployment-operator.yaml
-  - deployment-cache.yaml
-  - service-operator.yaml
-  - service-cache.yaml

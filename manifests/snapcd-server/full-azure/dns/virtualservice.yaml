@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: identity-tokenexchange
+spec:
+  gateways:
+    - "{{.Env.ARGOCD_ENV_NAMESPACE}}/{{.Env.ARGOCD_ENV_GATEWAY_NAME}}"
+  hosts:
+    - "{{.Env.ARGOCD_ENV_FQDN}}"
+  http:
+    - match:
+        - uri:
+            prefix: "/"
+      route:
+        - destination:
+            host: identity-tokenexchange
+            port:
+              number: 80

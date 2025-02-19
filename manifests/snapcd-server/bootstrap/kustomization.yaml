@@ -1,0 +1,42 @@
+namespace: snapcd
+
+resources:
+  - namespace.yaml
+  - pvc-postgres.yaml
+  - pvc-influxdb.yaml
+  - pvc-snapcd.yaml
+  - deployment-postgres.yaml
+  - deployment-influxdb.yaml
+  - deployment-snapcd.yaml
+  - service-postgres.yaml
+  - service-influxdb.yaml
+  - service-snapcd.yaml
+  - service-snapcd-loadbalancer.yaml
+  - serviceaccount-snapcd.yaml
+
+configMapGenerator:
+  - name: snapcd-settings
+    files:
+      - ./configs/appsettings.json
+  - name: snapcd
+    files:
+      - ./configs/OpenIdConnect__TokenSigning__RsaPublicKey
+    envs:
+      - ./configs/snapcd.env
+
+secretGenerator:
+  - name: influxdb
+    envs:
+      - ./secrets/influxdb.env
+  - name: postgres
+    envs:
+      - ./secrets/postgres.env
+  - name: snapcd
+    envs:
+      - ./secrets/snapcd.env
+    files:
+      - ./secrets/OpenIdConnect__TokenEncryption__SymmetricKey
+      - ./secrets/OpenIdConnect__TokenSigning__RsaPrivateKey
+
+generatorOptions:
+  disableNameSuffixHash: false

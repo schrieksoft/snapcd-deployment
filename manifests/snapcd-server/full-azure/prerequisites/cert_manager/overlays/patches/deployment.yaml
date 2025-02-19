@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  template:
+    spec:
+      securityContext:
+        fsGroup: 65534
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"

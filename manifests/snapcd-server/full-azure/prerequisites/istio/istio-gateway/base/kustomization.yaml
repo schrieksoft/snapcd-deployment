@@ -1,0 +1,7 @@
+namespace: istio-gateway
+
+resources:
+  - ../upstream
+  - namespace.yaml
+  - wasm-plugin-daemon-set.yaml
+  # - wasm-plugin-gateway.yaml

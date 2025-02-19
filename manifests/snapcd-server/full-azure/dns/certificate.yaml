@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "{{.Env.ARGOCD_ENV_NAMESPACE}}--{{.Env.ARGOCD_ENV_NAME}}"
+  namespace: istio-gateway # this has to deploy into the namespace where the istio-gateway Pod is running
+spec:
+  secretName: "{{.Env.ARGOCD_ENV_NAMESPACE}}--{{.Env.ARGOCD_ENV_NAME}}"
+  issuerRef:
+    name: "{{.Env.ARGOCD_ENV_NAMESPACE}}--{{.Env.ARGOCD_ENV_NAME}}"
+    kind: "ClusterIssuer"
+  commonName: "{{.Env.ARGOCD_ENV_FQDN}}"
+  dnsNames:
+    - "{{.Env.ARGOCD_ENV_FQDN}}"

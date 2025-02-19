@@ -1,0 +1,105 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "{{.Env.ARGOCD_ENV_NAMESPACE}}--external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+  labels:
+    app.kubernetes.io/name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "external-dns"
+subjects:
+  - kind: ServiceAccount
+    name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+# ---
+###################
+## ClusterRole is deployed only once for the cluster as part of the "internal-cluster" / "prod-cluster" deployment
+##################
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   name: "external-dns"
+#   labels:
+#     app.kubernetes.io/name: "external-dns"
+# rules:
+#   - apiGroups:
+#       - ""
+#     resources:
+#       - services
+#       - pods
+#       - nodes
+#       - endpoints
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - extensions
+#       - "networking.k8s.io"
+#       - getambassador.io
+#     resources:
+#       - ingresses
+#       - hosts
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - route.openshift.io
+#     resources:
+#       - routes
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - networking.istio.io
+#     resources:
+#       - gateways
+#       - virtualservices
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - zalando.org
+#     resources:
+#       - routegroups
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - zalando.org
+#     resources:
+#       - routegroups/status
+#     verbs:
+#       - patch
+#       - update
+#   - apiGroups:
+#       - projectcontour.io
+#     resources:
+#       - httpproxies
+#     verbs:
+#       - get
+#       - watch
+#       - list
+#   - apiGroups:
+#       - gloo.solo.io
+#       - gateway.solo.io
+#     resources:
+#       - proxies
+#       - virtualservices
+#     verbs:
+#       - get
+#       - list
+#       - watch
+#   - apiGroups:
+#       - configuration.konghq.com
+#     resources:
+#       - tcpingresses
+#     verbs:
+#       - get
+#       - list
+#       - watch

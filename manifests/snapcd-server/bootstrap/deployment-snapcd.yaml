@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snapcd
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: snapcd
+  template:
+    metadata:
+      labels:
+        app: snapcd
+    spec:
+      serviceAccountName: snapcd
+      containers:
+        - name: snapcd
+          image: bmaprod.azurecr.io/snapcd-server-unlocked:0.2.8
+          command: 
+            - ./SnapCd.Server.Unlocked
+          args: 
+            - --urls "http://0.0.0.0:5000" 
+            - --settingsfile "appsettings.json"
+          envFrom:
+          - secretRef:
+              name: snapcd
+          - configMapRef:
+              name: snapcd
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: "/app/appsettings.json"
+              subPath: "appsettings.json"
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: snapcd
+        - name: config
+          configMap:
+            name: snapcd-settings

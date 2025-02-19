@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+  labels:
+    app.kubernetes.io/name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "false"
+        app.kubernetes.io/name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+        azure.workload.identity/use: "true"
+    spec:
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+                namespaces:
+                  - "default"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      serviceAccountName: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+      containers:
+        - name: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
+          # image: ghcr.io/block-markets-africa/external-dns:v0.11.1-77-g3ae5ccc6
+          image: docker.io/bitnami/external-dns:0.14.2-debian-12-r1
+          imagePullPolicy: Always
+          args:
+            #- "--namespace={{.Env.ARGOCD_ENV_NAMESPACE}}" # We currently cannot switch this on since the VirtualService and Gateway resources are in one namespace, but the LoadBalancer (of which external-dns needs to read the IP) is in another.
+            - --metrics-address=:7979
+            - --log-level=debug
+            - --log-format=text
+            - --policy=upsert-only
+            - "--provider={{.Env.ARGOCD_ENV_DNS_PROVIDER}}" # "azure" or "azure-private-dns"
+            - --registry=txt
+            - --interval=1m
+            - "--domain-filter={{.Env.ARGOCD_ENV_DNS_DOMAIN_FILTER}}"
+            - --source=ingress
+            - --source=istio-virtualservice
+            - --source=ingress
+          ports:
+            - name: http
+              containerPort: 7979
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          resources:
+            limits:
+              cpu: 100m
+              memory: 300Mi
+            requests:
+              cpu: 100m
+              memory: 300Mi
+          volumeMounts:
+            # Azure mountPath(s)
+            - name: azure-config-file
+              mountPath: /etc/kubernetes/
+              readOnly: true
+      volumes:
+        # Azure and Azure Private DNS volume(s)
+        - name: azure-config-file
+          secret:
+            secretName: "external-dns-{{.Env.ARGOCD_ENV_NAME_PREFIX}}"
