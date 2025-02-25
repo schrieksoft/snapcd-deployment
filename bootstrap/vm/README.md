@@ -1,0 +1,1 @@
+For instructions how to to use this module, see the official [Snap CD documentation](TODO)

@@ -1,0 +1,1 @@
+For instructions how to to use these configurations, see the official [Snap CD documentation](TODO)

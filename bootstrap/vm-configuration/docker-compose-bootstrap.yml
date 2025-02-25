@@ -1,0 +1,78 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    networks:
+      - snapcd-bootstrap
+    environment:
+      POSTGRES_USER: superuser
+      POSTGRES_PASSWORD: mysecretpassword
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresdata:/var/lib/postgresql/data/pgdata
+
+  influxdb:
+    container_name: influxdb
+    image: influxdb:2.7
+    volumes:
+      - influxdbdata:/var/lib/influxdb2
+    networks:
+      - snapcd-bootstrap
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: "setup"
+      DOCKER_INFLUXDB_INIT_USERNAME: "admin"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "admin123"
+      DOCKER_INFLUXDB_INIT_ORG: "org"
+      DOCKER_INFLUXDB_INIT_BUCKET: "bucket"
+      DOCKER_INFLUXDB_INIT_TOKEN: "inittoken123"
+      DOCKER_INFLUXDB_INIT_RETENTION: "30d"
+
+  snapcd:
+    container_name: snapcd
+    image: bmaprod.azurecr.io/snapcd-server-unlocked:0.2.31
+    depends_on:
+      influxdb:
+        condition: service_started
+      postgres:
+        condition: service_started
+    volumes:
+      - snapcddata:/data
+      - ./appsettings.json:/app/appsettings.json
+      - /usr/local/bin/terraform:/usr/local/bin/terraform
+      - /usr/local/bin/tofu:/usr/local/bin/tofu
+      - ./id_rsa:/root/.ssh/id_rsa
+      - ./known_hosts:/root/.ssh/known_hosts
+    networks:
+      - snapcd-bootstrap
+    ports:
+      - "5000:5000"
+      - "80:80"
+    entrypoint: ["./SnapCd.Server.Unlocked", "--urls", "http://0.0.0.0:5000","--settingsfile", "appsettings.json"]
+    environment:
+      DatabaseSettings__ConnectionString: Host=postgres;Port=5432;Database=SnapCd;Username=superuser;Password=mysecretpassword
+      OpenIdConnect__IssuerName: https://snapcd:5000/
+      SwaggerClient__AuthorizationUrl: https://snapcd:5000/connect/authorize
+      SwaggerClient__TokenUrl: https://snapcd:5000/connect/token
+      InfluxDbLogStore__Token: inittoken123
+      LicenseVerification__LicenseKey: ""
+      DataSeeder__AdminServicePrincipal__AlwaysSeed: "true"
+      DataSeeder__AdminServicePrincipal__ClientId: Admin
+      DataSeeder__IntegratedRunnerServicePrincipal__AlwaysSeed: "true"
+      DataSeeder__AdminUser__AlwaysSeed: "true"
+      DataSeeder__AdminUser__Name: user@preseeded.com
+      DataSeeder__AdminUser__Password: MysecretPassword@123
+      DataSeeder__AdminServicePrincipal__ClientSecret: somesecret
+      OpenIdConnect__TokenEncryption__SymmetricKey: "-----BEGIN SYMMETRIC KEY-----\nA/sdaeyQw+WGx0hLm2ni74u1mdPXDyFFMNZY3z32tUE=\n-----END SYMMETRIC KEY-----\n"
+      OpenIdConnect__TokenSigning__RsaPublicKey: "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDTVDh1S0hqxqmMUoVwnDPR+3pA\ntDEMvC122/ERSz4PdEtfsTSphz3y2ME6rYusKHWQqlBBVSOMarNuu+RMSlTkYoKw\nE5Te9lisdshOUfTPQdDGGNKm79GEbcVBCSFkgn9XuSCYGvIqXmpQ/+cG2vuPyn0Z\nmoONFmysH7+Z8FeQLwIDAQAB\n-----END PUBLIC KEY-----\n"
+      OpenIdConnect__TokenSigning__RsaPrivateKey: "-----BEGIN PRIVATE KEY-----\nMIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBANNUOHVLSGrGqYxS\nhXCcM9H7ekC0MQy8LXbb8RFLPg90S1+xNKmHPfLYwTqti6wodZCqUEFVI4xqs267\n5ExKVORigrATlN72WKx2yE5R9M9B0MYY0qbv0YRtxUEJIWSCf1e5IJga8ipealD/\n5wba+4/KfRmag40WbKwfv5nwV5AvAgMBAAECgYEAgtCHglPvp+kB2xLZ9zM6AKmi\nq5rfIfr6SbEsMIBbEkXywnF3H9nPxxvVwPTcmN0SqVJEC60gLDOAjvNQBsmccgNS\noIn9k13lgsOF9g5NUqYWCIcgit7ggcnwPQm/OpN0gci3WvXVX62ton8gujZwXnvR\nr1yruzEPfKeGkCDt6EECQQDvlB0vedVdq5MIuGGw2D2O7L3/nVa/6uUSyDjjPkn+\ns337T6SEJrVlS3pjIE8y0MS/MssFLmrq21WiOhfnU9/rAkEA4dBpNpth3pb7yjB5\n2rEIt24PsFkX2gH66pmjEXcK2R5bgCtLCygCGs9GmryP1Lo8M2xc7lCXQsXnvI39\nxciDzQJAX7CI961xyzf8Qj9ixX+ZFrz4JmBxhbYMSLQwBJOcel62sunci+vqB8td\n1rnQ6Dr6WmOvMyKXEbcJPQJ3Ca42gQJBAIhMKEVakj8tOLs4eURj2NQGrZeOnxPq\nYA4cP8354WVdqnL5LqmEM4kFFSOurs4CvvV28byyjioylAY+Wi94MP0CQEIxE2Ss\nIw+P42SgKgkFPmBWaWKeTCPK9mTzESFPUPVYFRNaDVJghzOBDB/XAG7sanKuKYLO\nsddafgQxpcv/umE=\n-----END PRIVATE KEY-----\n"
+volumes:
+  postgresdata:
+  snapcddata:
+  influxdbdata:
+networks:
+  snapcd-bootstrap:
+    external: true
