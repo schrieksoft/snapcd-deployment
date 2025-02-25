@@ -102,8 +102,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
 # assign permissions
 resource "azurerm_role_assignment" "vm_contributor" {
-  scope                = var.owned_subscription_id
-  role_definition_name = "Contributor"
+
+  for_each = { for i, obj in var.role_assignments : i => val }
+  scope                = obj.key
+  role_definition_name = obj.value
   principal_id         = azurerm_linux_virtual_machine.vm.identity[0].principal_id
 }
 

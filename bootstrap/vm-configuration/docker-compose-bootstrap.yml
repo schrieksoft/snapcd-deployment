@@ -2,8 +2,7 @@ services:
   postgres:
     container_name: postgres
     image: postgres:16
-    networks:
-      - snapcd-bootstrap
+    network_mode: host
     environment:
       POSTGRES_USER: superuser
       POSTGRES_PASSWORD: mysecretpassword
@@ -18,8 +17,7 @@ services:
     image: influxdb:2.7
     volumes:
       - influxdbdata:/var/lib/influxdb2
-    networks:
-      - snapcd-bootstrap
+    network_mode: host
     ports:
       - "8086:8086"
     environment:
@@ -46,17 +44,16 @@ services:
       - /usr/local/bin/tofu:/usr/local/bin/tofu
       - ./id_rsa:/root/.ssh/id_rsa
       - ./known_hosts:/root/.ssh/known_hosts
-    networks:
-      - snapcd-bootstrap
+    network_mode: host
     ports:
       - "5000:5000"
       - "80:80"
     entrypoint: ["./SnapCd.Server.Unlocked", "--urls", "http://0.0.0.0:5000","--settingsfile", "appsettings.json"]
     environment:
-      DatabaseSettings__ConnectionString: Host=postgres;Port=5432;Database=SnapCd;Username=superuser;Password=mysecretpassword
-      OpenIdConnect__IssuerName: https://snapcd:5000/
-      SwaggerClient__AuthorizationUrl: https://snapcd:5000/connect/authorize
-      SwaggerClient__TokenUrl: https://snapcd:5000/connect/token
+      DatabaseSettings__ConnectionString: Host=localhost;Port=5432;Database=SnapCd;Username=superuser;Password=mysecretpassword
+      OpenIdConnect__IssuerName: https://localhost:5000/
+      SwaggerClient__AuthorizationUrl: https://localhost:5000/connect/authorize
+      SwaggerClient__TokenUrl: https://localhost:5000/connect/token
       InfluxDbLogStore__Token: inittoken123
       LicenseVerification__LicenseKey: ""
       DataSeeder__AdminServicePrincipal__AlwaysSeed: "true"
