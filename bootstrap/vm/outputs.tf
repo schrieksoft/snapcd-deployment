@@ -13,3 +13,8 @@ output "env_vars" {
 output service_principal_object_id {
   value = azurerm_linux_virtual_machine.vm.identity[0].principal_id
 }
+
+
+ output "vnet_id" {
+  value = azurerm_virtual_network.vnet.id
+ }
