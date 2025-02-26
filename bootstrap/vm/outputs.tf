@@ -2,6 +2,7 @@
 output "env_vars" {
   value = <<-EOT
     VM_IP=${azurerm_public_ip.public_ip.ip_address}
+    VM_PRIVATE_IP=${azurerm_linux_virtual_machine.vm.private_ip_address}
     RESOURCE_GROUP=${var.resource_group_name}
     VM_NAME=${var.vm_name}
     LOCATION=${var.location}
