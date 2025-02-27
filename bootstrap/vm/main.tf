@@ -90,6 +90,8 @@ resource "azurerm_user_assigned_identity" "identity" {
   location            = azurerm_resource_group.main.location
 }
 
+
+
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.main.name
@@ -126,7 +128,7 @@ resource "azurerm_role_assignment" "vm_contributor" {
   for_each = { for i, obj in var.role_assignments : i => obj }
   scope                = each.value.resource_object_id
   role_definition_name = each.value.role_name
-  principal_id         = azurerm_linux_virtual_machine.vm.identity[0].principal_id
+  principal_id         = azurerm_user_assigned_identity.identity.principal_id
 }
 
 data "azuread_application_published_app_ids" "well_known" {}
@@ -154,7 +156,7 @@ resource "azuread_app_role_assignment" "this" {
 #   depends_on          = [azuread_application_api_access.this]
   for_each            = toset(local.role_ids)
   app_role_id         = each.value
-  principal_object_id = azurerm_linux_virtual_machine.vm.identity[0].principal_id
+  principal_object_id = azurerm_user_assigned_identity.identity.principal_id
   resource_object_id  = data.azuread_service_principal.msgraph.object_id
 }
 
