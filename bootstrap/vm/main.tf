@@ -83,6 +83,13 @@ resource "azurerm_network_interface_security_group_association" "example" {
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
+
+resource "azurerm_user_assigned_identity" "identity" {
+  name                = var.vm_name
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+}
+
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.main.name
@@ -108,7 +115,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 
   identity {
-    type = "SystemAssigned"
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.identity.id]
   }
 }
 
